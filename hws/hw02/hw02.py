@@ -1,4 +1,6 @@
-HW_SOURCE_FILE=__file__
+from operator import sub, mul
+from construct_check import check
+HW_SOURCE_FILE = __file__
 
 
 def num_eights(x):
@@ -23,6 +25,15 @@ def num_eights(x):
     True
     """
     "*** YOUR CODE HERE ***"
+    if x == 0:
+        return 0
+    elif x == 8:
+        return 1
+    else:
+        if x % 10 == 8:
+            return num_eights(x//10) + 1
+        else:
+            return num_eights(x//10)
 
 
 def pingpong(n):
@@ -58,6 +69,18 @@ def pingpong(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    def pingpong_solve(index, num, dir):
+        if n == 1:
+            return 1
+        elif index == n:
+            return num
+        else:
+            if index % 8 == 0 or num_eights(index):
+                return pingpong_solve(index+1, num - dir, -dir)
+            else:
+                return pingpong_solve(index+1, num + dir, dir)
+
+    return pingpong_solve(1, 1, 1)
 
 
 def missing_digits(n):
@@ -88,6 +111,17 @@ def missing_digits(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    def missing_digits_helper(n, k, result=0):
+        if n == 0:
+            return result
+        else:
+            all_but_last, last = n // 10, n % 10
+            if k - last > 1:
+                return missing_digits_helper(all_but_last, last, result + (k - last - 1))
+            else:
+                return missing_digits_helper(all_but_last, last, result)
+
+    return missing_digits_helper(n, n % 10)
 
 
 def next_largest_coin(coin):
@@ -124,9 +158,22 @@ def count_coins(total):
     True
     """
     "*** YOUR CODE HERE ***"
+    def count_total_solve(target, smallest_one):
+        if target == 0:
+            return 1
+        elif target < 0:
+            return 0
+        elif not smallest_one:
+            return 0
+        else:
+            next_one = next_largest_coin(smallest_one)
+            with_smallest_one = count_total_solve(
+                target - smallest_one, smallest_one)
+            without_smallest_one = count_total_solve(target, next_one)
+            return with_smallest_one + without_smallest_one
 
+    return count_total_solve(total, 1)
 
-from operator import sub, mul
 
 def make_anonymous_factorial():
     """Return the value of an expression that computes factorial.
@@ -138,5 +185,4 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
-
+    return lambda b: (lambda a, b: a(a, b))(lambda a, b: b*a(a, b-1) if b > 0 else 1, b)
